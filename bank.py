@@ -10,7 +10,6 @@ DB_NAME = "bank_system.db"
 
 
 def init_db():
-    """إنشاء جدول الحسابات إذا لم يكن موجوداً"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -37,7 +36,6 @@ init_db()
 # Helper Validations
 # ==============================
 def is_valid_email(email):
-    """التحقق من صحة صيغة البريد الإلكتروني"""
     pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
     return re.match(pattern, email) is not None
 
@@ -128,7 +126,6 @@ class CheckingAccount(BankAccount):
 # Data Access Layer (DB Operations)
 # ==============================
 def get_account_by_id(acc_id):
-    """جلب حساب من قاعدة البيانات ككائن OOP"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -152,7 +149,6 @@ def get_account_by_id(acc_id):
 
 
 def update_account_balance(acc_id, new_balance):
-    """تحديث الرصيد في قاعدة البيانات"""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute(
@@ -184,7 +180,6 @@ def create_account(acc_type, name, email, balance, pin, extra_val):
     if acc_type == "Savings Account":
         rate_or_limit = rate_or_limit / 100 if rate_or_limit > 1 else rate_or_limit
 
-    # إدخال الحساب في قاعدة البيانات (يمنع تكرار الإيميل تلقائياً بفضل UNIQUE)
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
@@ -220,7 +215,6 @@ def show_accounts():
     if not rows:
         return [["-", "-", "-", "-", "-", "-"]]
 
-    # تجهيز البيانات للعرض في جدول (تم إخفاء الـ PIN لسلامة الأمان)
     table_data = []
     for row in rows:
         acc_id, name, email, balance, acc_type, extra = row
@@ -284,14 +278,12 @@ def handle_transfer(sender_id, sender_pin, receiver_id, amount):
     if err2:
         return f"Receiver Error: {err2}"
 
-    # تنفيذ السحب من المرسل والإيداع للمستلم
     success, msg = sender.withdraw(amount)
     if not success:
         return f"Transfer Failed: {msg}"
 
     receiver.deposit(amount)
 
-    # حفظ الرصيد الجديد لكلا الحسابين في قاعدة البيانات
     update_account_balance(sender_id, sender.balance)
     update_account_balance(receiver_id, receiver.balance)
 
